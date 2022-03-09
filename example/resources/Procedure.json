@@ -1,0 +1,34 @@
+{
+  "resourceType": "Procedure",
+  "id": "ee6beac6-aaaa-957c-767e-1e1c925c816c",
+  "text": {
+    "status": "generated",
+    "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Colonoscopy with complication</div>"
+  },
+  "identifier": [
+    {
+      "use": "official",
+      "system": "https://github.com/synthetichealth/synthea",
+      "value": "ee6beac6-aaaa-957c-767e-1e1c925c816c"
+    }
+  ],
+  "status": "completed",
+  "code": {
+    "coding": [
+      {
+        "system": "http://snomed.info/sct",
+        "code": "73761001",
+        "display": "Colonoscopy (procedure)"
+      }
+    ],
+    "text": "Colonoscopy"
+  },
+  "subject": {
+    "reference": "urn:uuid:71a8b156-760b-df6b-859e-eefc7932a526",
+    "display": "Mrs. Adriana394 Kutch271"
+  },
+  "encounter": {
+    "reference": "urn:uuid:ee6beac6-aaaa-957c-767e-1e1caa5c816c"
+  },
+  "performedDateTime": "2022-02-15T10:20:13-05:00"
+}
