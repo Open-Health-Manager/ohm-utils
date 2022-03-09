@@ -29,14 +29,16 @@ module Ohm
 
       # loop over files in the directory
       Dir.foreach(directory) do |filename|
+        next if not(filename.end_with?(".json"))
         filepath = File.join(directory, filename)
         next if File.directory?(filepath)
-        
+
+        puts "processing file: " + filename
+
         # parse json and add as a bundle entry
         contents = File.read(filepath)
         resource = FHIR.from_contents(contents)
         bundle.entry << createTransactionBundleEntry(resource)
-
 
       end
 
@@ -44,6 +46,10 @@ module Ohm
       dirname = File.basename(directory)
       bundleFile = File.join(File.join(directory, ".."), dirname + "_transactionBundle.json")
       File.write(bundleFile, bundle.to_json)
+
+      puts ""
+      puts "Bundle written to: " + bundleFile
+      puts ""puts ""
 
       return bundleFile
 
@@ -85,8 +91,11 @@ module Ohm
 
       # add each file as an entry to the bundle
       Dir.foreach(directory) do |filename|
+        next if not(filename.end_with?(".json"))
         filepath = File.join(directory, filename)
         next if File.directory?(filepath)
+
+        puts "processing file: " + filename
         
         # parse json and add as a bundle entry
         contents = File.read(filepath)
@@ -98,6 +107,10 @@ module Ohm
       dirname = File.basename(directory)
       bundleFile = File.join(File.join(directory, ".."), dirname + "_PDRMessageBundle.json")
       File.write(bundleFile, bundle.to_json)
+
+      puts ""
+      puts "Bundle written to: " + bundleFile
+      puts ""puts ""
 
       return bundleFile
 
