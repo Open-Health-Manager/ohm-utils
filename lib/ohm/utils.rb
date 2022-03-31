@@ -20,7 +20,7 @@ module Ohm
   module Utils
     class Error < StandardError; end
     
-    def self.createTransactionFromDirectory(directory)
+    def self.createTransactionFromDirectory(directory, useResourceId = false)
       
       # create the bundle
       bundle = FHIR::Bundle.new(
@@ -38,7 +38,7 @@ module Ohm
         # parse json and add as a bundle entry
         contents = File.read(filepath)
         resource = FHIR.from_contents(contents)
-        bundle.entry << createTransactionBundleEntry(resource)
+        bundle.entry << createTransactionBundleEntry(resource, useResourceId)
 
       end
 
@@ -49,21 +49,35 @@ module Ohm
 
       puts ""
       puts "Bundle written to: " + bundleFile
-      puts ""puts ""
+      puts ""
 
       return bundleFile
 
     end
 
-    def self.createTransactionBundleEntry(resource)
+    def self.createTransactionBundleEntry(resource, useResourceId = false)
       
       resourceType = resource.class.name.split('::').last
+
+
+      if (useResourceId)
+        
+        if (resource.id == "")
+          raise "Failed to use resource Id: empty"
+        end
+        method = 'PUT'
+        url = resourceType + "/" + resource.id
+
+      else
+        method = 'POST'
+        url = resourceType
+      end
 
       entry = FHIR::Bundle::Entry.new(
         'resource' => resource,
         'request' => {
-          'method' => 'POST',
-          'url' => resourceType
+          'method' => method,
+          'url' => url
         }
       )
 
@@ -110,7 +124,7 @@ module Ohm
 
       puts ""
       puts "Bundle written to: " + bundleFile
-      puts ""puts ""
+      puts ""
 
       return bundleFile
 
@@ -142,6 +156,37 @@ module Ohm
     def self.isUUID(uuid)
       uuid_regex = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
       return uuid_regex.match?(uuid.to_s.downcase)
+    end
+
+    def self.bundleToIndividualResourceFiles(filepath)
+      
+      contents = File.read(filepath)
+      bundle = FHIR.from_contents(contents)
+
+      directory_name = File.join(File.dirname(filepath), File.basename(filepath, ".*"))
+      Dir.mkdir(directory_name) unless File.exists?(directory_name)
+
+      if not(bundle.is_a?(FHIR::Bundle))
+        raise "Can't convert to individual resource files: not a bundle"
+      end
+
+      bundle.entry.each do |entry|
+        # sometimes nil shows up here for some reason
+        next unless entry
+  
+        if not(entry.resource.id)
+          raise "Can't convert to individual resource files: entry missing an id"
+        end
+        
+        resource = entry.resource
+        fileName = resource.resourceType + "-" + resource.id + ".json"
+        resourceFile = File.join(directory_name, fileName)
+        File.write(resourceFile, resource.to_json)
+
+        puts "wrote resource file: " + resourceFile
+
+      end
+
     end
 
   end

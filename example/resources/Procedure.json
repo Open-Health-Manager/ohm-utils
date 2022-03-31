@@ -1,6 +1,11 @@
 {
   "resourceType": "Procedure",
   "id": "ee6beac6-aaaa-957c-767e-1e1c925c816c",
+  "meta" : {
+    "profile" : [
+      "http://hl7.org/fhir/us/core/StructureDefinition/us-core-procedure"
+    ]
+  },
   "text": {
     "status": "generated",
     "div": "<div xmlns=\"http://www.w3.org/1999/xhtml\">Colonoscopy with complication</div>"
