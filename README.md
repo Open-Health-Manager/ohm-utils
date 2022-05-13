@@ -3,8 +3,11 @@
 Utilities for MITRE's Open Health Manager™, including
 - generate a transaction bundle (create all) from a directory of files with json FHIR resources
 - generate a [Patient Data Receipt](https://open-health-manager.github.io/patient-data-receipt-ig/) from a directory of files with json FHIR resources
+- generate a PDR from a searchSet bundle
+- generate individual resource files from a bundle where the entries have ids
+- run goFSH on directories and sub-directories and collect generated fsh files
 
-## Usage
+## Bundle Generation (transaction and PDR) Usage
 
 Run using the interactive ruby prompt: `irb -r ./lib/ohm/utils.rb`
 

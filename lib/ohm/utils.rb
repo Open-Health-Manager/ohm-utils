@@ -20,6 +20,12 @@ module Ohm
   module Utils
     class Error < StandardError; end
     
+    ########################################
+    # JSON files into a directory to bundles
+    # - transaction bundle
+    # - PDR message bundle
+    ########################################
+
     def self.createTransactionFromDirectory(directory, useResourceId = false)
       
       # create the bundle
@@ -158,6 +164,30 @@ module Ohm
       return uuid_regex.match?(uuid.to_s.downcase)
     end
 
+
+    ########################################
+    # SearchSet bundle to PDR Bundle
+    ########################################
+
+    def self.searchSetToPDR(searchSetBundle, username, sourceURL)
+      # create the bundle
+      pdrBundle = FHIR::Bundle.new(
+        'type' => 'message'
+      )
+
+      # add the message header
+      pdrBundle.entry << createPDRMessageHeaderEntry(username, sourceURL)
+      searchSetBundle.entry.each do |searchSetEntry|
+        pdrBundle.entry << createPDRBundleEntry(searchSetEntry.resource)
+      end
+
+      return pdrBundle
+    end
+
+    ########################################
+    # unwrap bundles into individual files (requires ids)
+    ########################################
+
     def self.bundleToIndividualResourceFiles(filepath)
       
       contents = File.read(filepath)
@@ -189,6 +219,59 @@ module Ohm
 
     end
 
-  end
+    def self.bundlesInDirToIndividualResourceFiles(directory)
+      Dir.foreach(directory) do |filename|
+        next if not(filename.end_with?(".json"))
+        filepath = File.join(directory, filename)
+        next if File.directory?(filepath)
+
+        puts "processing file: " + filename
+        
+        bundleToIndividualResourceFiles(filepath)
+      end
+    end
+
+    ########################################
+    # - convert JSON resource files in directory 
+    # and sub-directories into FSH
+    # - collect resulting FSH files
+    ########################################
+
     
+    def self.executeGoFSH(directory)
+      outDir = File.join(directory, "goFSH")
+      cmd = "gofsh -s single-file -o """ + outDir + """ """ + directory + """"
+      wasGood = system( cmd )
+      puts "processing directory: " + directory + "; result = " + (wasGood ? "success" : "fail")
+    end
+
+    def self.subDirsExecuteGoFSH(directory) 
+      Dir.foreach(directory) do |filename|
+        next if (filename == ".")
+        next if (filename == "..")
+        filepath = File.join(directory, filename)
+        next if not(File.directory?(filepath))
+
+        executeGoFSH(filepath)
+      end
+    end
+
+    def self.subDirsCollectFSHFiles(directory) 
+      targetDir = File.join(directory, "asFSH")
+      Dir.mkdir(targetDir) unless File.exists?(targetDir)
+      
+      Dir.foreach(directory) do |filename|
+        next if (filename == ".")
+        next if (filename == "..")
+        next if (filename == "asFSH")
+        filepath = File.join(directory, filename)
+        next if not(File.directory?(filepath))
+
+        sourceFile = File.join(File.join(File.join(File.join(File.join(directory, filename), "goFSH"), "input"), "fsh"), "resources.fsh")
+        cmd = "cp " + sourceFile + " " + targetDir
+        puts(cmd)
+        system ( cmd )
+      end
+    end
+  end
 end
