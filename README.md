@@ -55,6 +55,8 @@ puts Ohm::Utils::createTransactionFromDirectory("example/resour
 ces")
 ```
 
+`createTransactionFromDirectory` supports a second boolean input. If set to `true`, then PUTs will be used whenever an id is specified on the resource (default is `false`)
+
 ## License
 Copyright 2022 The MITRE Corporation
 
